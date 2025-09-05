@@ -24,13 +24,13 @@ class TTSConnection {
 }
 
 class ChatConnection {
-    constructor(apiKey) {
+    constructor() {
 	this.model = "gemini-2.0-flash";
 	this.systemPrompt = "Format your answer as HTML."
     }
 
     getUrl(request) {
-	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${apiKey}`;
+	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${googleApiKey}`;
     }
 
     async simpleRequest(prompt) {
@@ -67,7 +67,7 @@ class ChatConnection {
     }
 
     async uploadData(data, filename, mimeType) {
-	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`, {
+	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleApiKey}`, {
 	    method: "POST",
 	    headers: {
 		"X-Goog-Upload-Protocol": "resumable",
