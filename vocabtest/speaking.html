@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Speaking Test</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <link rel="stylesheet" type="text/css" href="./speaking.css" />
+    <script src="englishwordlist.js"></script>
+    <script src="getsettings.js"></script>
+    <script src="google-genai.js"></script>
+    <script src="audio.js"></script>
+    <script src="speaking.js"></script>
+  </head>
+  <body onload="loadSettings();">
+    <h1>Speaker Test</h1>
+    <div id="question">
+    </div>
+    <div id="assessment">    
+    </div>
+    <div id="controls">
+      <button id="toggleRecording" disabled>Ready to speak</button>
+      <button id="generateSentence" onclick="generateSentence()">Another sentence</button>
+      <button id="showAnswer" disabled>Show answer</button>
+      <button onclick="activateSettingsModal();">Settings</button>
+    </div>
+    <div id="settingsOverlay" onsubmit="collectSettings()">
+      <div id="settingsModal">
+	<label>Gemini API key<textarea id="apiKeyEntry" rows="4" cols="50" ></textarea></label>
+	<br/>
+	<label>Model<input type="text" id="modelEntry" /></label>
+	<label>Language<select id="language">
+	    <option value="slovene">Slovene</option>
+	  </select>
+	</label>	  
+	<button onclick="collectSettings();">Save</button>
+      </div>
+    </div>
+  </body>
+</html>
