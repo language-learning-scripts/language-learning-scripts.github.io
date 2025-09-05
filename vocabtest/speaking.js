@@ -60,7 +60,7 @@ async function recordAnswer(testPhrase) {
     };
     document.getElementById("generateSentence").onclick = (e) => {
 	activeRecording.cancel();
-	showAnswer(testPhrase);
+	generateSentence();
     }
 }
 
