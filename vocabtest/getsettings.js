@@ -45,7 +45,7 @@ function languageName() {
 }
 
 async function ensureVocabLoaded() {
-    if (len(vocab) == 0) {
+    if (vocab.length == 0) {
 	const response = await fetch(supportedLanguages[language]["vocab_file"]);
 	vocab = await response.json();
     }
