@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Listening Test</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <link rel="icon" type="image/png" href="logo32.png" />
+    <link rel="stylesheet" type="text/css" href="./cacophony.css" />
+    <script src="englishwordlist.js"></script>
+    <script src="getsettings.js"></script>
+    <script src="google-genai.js"></script>
+    <script src="audio.js"></script>
+    <script src="cacophony.js"></script>
+  </head>
+  <body onload="loadSettings();">
+    <div id="heading">
+      <h1 onclick="listenMode();">Listening Test</h1>
+      <h1 onclick="speakMode();">Speaking Test</h1>
+    </div>
+    <div id="listenPanel" class="mainPanel">
+      <div id="answerInputDiv">
+	<form id="answerInputForm">
+	  <input type="text" id="answerInput"></input>
+	</form>
+      </div>
+      <div class="assessmentBox" id="listenAssess">
+      </div>
+      <div id="listenControls" class="controls">
+	<button id="tryAnswer" disabled>Try answer</button>
+	<button id="repeatQuestion" disabled>Repeat question</button>
+	<button id="generateForeignSentence" onclick="generateForeignSentence()">Another sentence</button>
+	<button id="listenShowAnswer" disabled>Show answer</button>
+	<button onclick="activateSettingsModal();">Settings</button>
+      </div>
+    </div>
+    <div class="mainPanel" id="speakPanel">
+      <div id="question">
+      </div>
+      <div id="speakAssess" class="assessmentBox">
+      </div>
+      <div id="speakControls" class="controls">
+	<button id="toggleRecording" disabled>Ready to speak</button>
+	<button id="generateEnglishSentence" onclick="generateEnglishSentence()">Another sentence</button>
+	<button id="speakShowAnswer" disabled>Show answer</button>
+	<button id="settingsButton" onclick="activateSettingsModal();">Settings</button>
+      </div>
+    </div>
+    <div id="settingsOverlay" onsubmit="collectSettings()">
+      <div id="settingsModal">
+	<label>Gemini API key<textarea id="apiKeyEntry" rows="4" cols="40" ></textarea></label>
+	<br/>
+	<label>Model<input type="text" id="modelEntry" /></label>
+	<label>Language<select id="language">
+	    <option value="slovene">Slovene</option>
+	  </select>
+	</label>
+	<button onclick="collectSettings();">Save</button>
+      </div>
+    </div>
+  </body>
+</html>

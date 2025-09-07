@@ -17,9 +17,46 @@ function jsonListTransformer() {
     });
 }
 
+function getUrl(model, request) {
+    return `https://generativelanguage.googleapis.com/v1beta/models/${model}:${request}?key=${googleApiKey}`;
+}
+
 class TTSConnection {
-    constructor(apiKey) {
-	this.model = model;
+    constructor() {
+	this.model = "gemini-2.5-flash-preview-tts";
+    }
+
+    async generateAudio(prompt) {
+	const response = await fetch(getUrl(this.model, "generateContent"), {
+	    method: "POST",
+	    headers: {
+		"Content-Type": "application/json"
+	    },
+	    body: JSON.stringify({
+		"contents": [{
+		    "parts": [{
+			"text": prompt
+		    }]
+		}],
+		"generationConfig": {
+		    "responseModalities": ["AUDIO"],
+		    "speechConfig": {
+			"voiceConfig": {
+			    "prebuiltVoiceConfig": {
+				"voiceName": "Kore"
+			    }
+			}
+		    }
+		},
+		"model": this.model
+	    })
+	});
+
+	const responseData = await response.json();
+	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
+	const audioData = Uint8Array.fromBase64(base64Audio);
+
+	return audioData;
     }
 }
 
@@ -29,12 +66,12 @@ class ChatConnection {
 	this.systemPrompt = "Format your answer as HTML."
     }
 
-    getUrl(request) {
-	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${googleApiKey}`;
-    }
+    // getUrl(request) {
+    // 	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${googleApiKey}`;
+    // }
 
     async simpleRequest(prompt) {
-	const response = await fetch(this.getUrl("generateContent"), {
+	const response = await fetch(getUrl(this.model, "generateContent"), {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json"
@@ -50,7 +87,7 @@ class ChatConnection {
     }
 
     async streamRequest(prompt) {
-	const response = await fetch(this.getUrl("streamGenerateContent"), {
+	const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json"
@@ -105,7 +142,7 @@ class ChatConnection {
 
     async audioStreamRequest(prompt, audioData, mimeType) {
 	const fileData = await this.uploadData(audioData, "audio", mimeType);
-	const response = await fetch(this.getUrl("streamGenerateContent"), {
+	const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json"

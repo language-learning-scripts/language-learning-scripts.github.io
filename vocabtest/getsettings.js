@@ -1,10 +1,12 @@
 var googleApiKey = "";
 var model = "gemini-2.0-flash";
 var language = "";
+var vocab = []
 
 const supportedLanguages = {
     "slovene": {
 	"language_name": "Slovene",
+	"vocab_file": "vocab_sl.json"
     }
 }
 
@@ -16,9 +18,9 @@ function activateSettingsModal() {
 }
 
 function loadSettings() {
-    model = localStorage.getItem("model");
+    model = localStorage.getItem("cacophonyModel");
     googleApiKey = localStorage.getItem("googleApiKey");
-    language = localStorage.getItem("language");
+    language = localStorage.getItem("cacophonyLanguage");
     if (! googleApiKey || ! language in supportedLanguages) {
 	activateSettingsModal();
     }
@@ -28,9 +30,23 @@ function collectSettings() {
     googleApiKey = document.getElementById("apiKeyEntry").value;
     model = document.getElementById("modelEntry").value;
     newLanguage = document.getElementById("language").value;
+    if (newLanguage != language) {
+	vocab = [];
+    }
     language = newLanguage;
     localStorage.setItem("googleApiKey", googleApiKey);
-    localStorage.setItem("model", model);
-    localStorage.setItem("language", language);
+    localStorage.setItem("cacophonyModel", model);
+    localStorage.setItem("cacophonyLanguage", language);
     document.getElementById("settingsOverlay").style.display = "none";
+}
+
+function languageName() {
+    return supportedLanguages[language]["language_name"];
+}
+
+async function ensureVocabLoaded() {
+    if (len(vocab) == 0) {
+	const response = await fetch(supportedLanguages[language]["vocab_file"]);
+	vocab = await response.json();
+    }
 }

@@ -99,3 +99,30 @@ async function blobToWav(blob) {
 
   return new Blob([buffer], { type: "audio/wav" });
 }
+
+function playPCM(pcm, sampleRate = 24000) {
+    const audioCtx = new AudioContext();
+
+    // Convert Uint8Array → Float32Array (normalize to [-1, 1])
+    const float32 = new Float32Array(pcm.length / 2);
+    const dv = new DataView(pcm.buffer)
+    for (let i = 0; i < float32.length; i++) {
+	// Little-endian 16-bit PCM
+	float32[i] = dv.getInt16(i * 2, true) / 0x8000;
+    }
+
+    // Create AudioBuffer
+    const buffer = audioCtx.createBuffer(1, float32.length, sampleRate);
+    buffer.getChannelData(0).set(float32);
+
+    // Play it
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start();
+    return new Promise((resolve, reject) => {
+	source.onended = (e) => {
+	    resolve();
+	};
+    })
+}
