@@ -43,6 +43,7 @@ class Recording {
 	    };
 
 	    self.mediaRecorder.stop();
+	    for (track of self.mediaRecorder.getAudio)
 	});
     }
 
