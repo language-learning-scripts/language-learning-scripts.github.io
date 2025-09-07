@@ -43,7 +43,7 @@ class Recording {
 	    };
 
 	    self.mediaRecorder.stop();
-	    for (track of self.mediaRecorder.getAudioTracks()) {
+	    for (track of self.mediaRecorder.stream.getAudioTracks()) {
 		track.enabled = false;
 	    }
 	});
