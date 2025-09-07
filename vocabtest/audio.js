@@ -43,7 +43,9 @@ class Recording {
 	    };
 
 	    self.mediaRecorder.stop();
-	    for (track of self.mediaRecorder.getAudio)
+	    for (track of self.mediaRecorder.getAudioTracks()) {
+		track.enabled = false;
+	    }
 	});
     }
 
