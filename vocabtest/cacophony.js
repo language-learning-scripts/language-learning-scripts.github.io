@@ -27,8 +27,7 @@ async function generateForeignSentence() {
     document.getElementById("answerInput").value = "";
     await ensureVocabLoaded();
     const entry = pick(vocab);
-    const testWord = pick(foreignWordlist);
-    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the word or phrase "${testWord}". Respond with the ${languageName()} sentence and no other text.`
+    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
@@ -98,9 +97,10 @@ async function listenShowAnswer(testSentence) {
 }
 
 async function generateEnglishSentence() {
-    const testWord = pick(englishWordList);
+    await ensureVocabLoaded();
+    const entry = pick(vocab);
 
-    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in English for them to translate into ${languageName()}. The sentence should contain the word or phrase "${testWord}". Respond with the English sentence and no other text.`
+    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in English for them to translate into ${languageName()}. The sentence should test their knowledge of the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the English sentence and no other text.`
 
     const testPhrase = await chatConnection.simpleRequest(testPhrasePrompt);
     document.getElementById("question").innerHTML = testPhrase;
