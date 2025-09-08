@@ -3,6 +3,8 @@ html, body {
     flex-direction: column;
     height: 100dvh;
     width: 100dwv;
+    min-height: 0;
+    overflow: clip;
 }
 
 #heading {
@@ -11,10 +13,10 @@ html, body {
 }
 
 .mainPanel {
+    min-height: 0;
     display: flex;
     flex-grow: 1;
     flex-direction: column;
-    overflow: clipped;
     gap: 10px;    
 }
 
@@ -54,6 +56,7 @@ button {
 }
 
 .assessmentBox {
+    min-height: 0;
     font-size: x-large;
     font-family: monospace;
     max-width: 1000px;
@@ -69,6 +72,7 @@ button {
 
 #answerInputDiv {
     width: 90%;
+    max-width: 1000px;
     align-text: center;
     margin: auto;
 }
