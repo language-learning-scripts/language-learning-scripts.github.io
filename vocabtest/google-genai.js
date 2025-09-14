@@ -57,7 +57,7 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
 
     if (! response.ok) {
 	body = await response.json();
-	throw GoogleRequestError(body);
+	throw new GoogleRequestError(body);
     }
 
     return response;
