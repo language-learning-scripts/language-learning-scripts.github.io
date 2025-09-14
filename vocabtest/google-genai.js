@@ -46,7 +46,7 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
     if (! dictIsEmpty(config)) {
 	request["generationConfig"] = config;
     }
-    
+
     const response = await fetch(url, {
 	method: "POST",
 	headers: {
@@ -80,30 +80,6 @@ class TTSConnection {
 		}
 	    }
 	});
-	// const response = await fetch(getUrl(this.model, "generateContent"), {
-	//     method: "POST",
-	//     headers: {
-	// 	"Content-Type": "application/json"
-	//     },
-	//     body: JSON.stringify({
-	// 	"contents": [{
-	// 	    "parts": [{
-	// 		"text": prompt
-	// 	    }]
-	// 	}],
-	// 	"generationConfig": {
-	// 	    "responseModalities": ["AUDIO"],
-	// 	    "speechConfig": {
-	// 		"voiceConfig": {
-	// 		    "prebuiltVoiceConfig": {
-	// 			"voiceName": "Kore"
-	// 		    }
-	// 		}
-	// 	    }
-	// 	},
-	// 	"model": this.model
-	//     })
-	// });
 
 	const responseData = await response.json();
 	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
@@ -119,49 +95,14 @@ class ChatConnection {
 	this.systemPrompt = "Format your answer as HTML."
     }
 
-    // getUrl(request) {
-    // 	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${googleApiKey}`;
-    // }
-
-
     async simpleRequest(prompt) {
 	const response = await genericGoogleRequest(this.model, "generateContent", [{"text": prompt}], {});
-	// const response = await fetch(getUrl(this.model, "generateContent"), {
-	//     method: "POST",
-	//     headers: {
-	// 	"Content-Type": "application/json"
-	//     },
-	//     body: JSON.stringify({
-	// 	"contents": [{
-	// 	    "parts": [{"text": prompt}]
-	// 	}]
-	//     })
-	// });
-	// if (! response.ok) {
-	//     alert(`Simple request failed: ${response.statusText}`);
-	//     return null;
-	// }
 	const response_data = await response.json();
 	return response_data.candidates[0].content.parts[0].text;
     }
 
     async streamRequest(prompt) {
 	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}], {});
-	// const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
-	//     method: "POST",
-	//     headers: {
-	// 	"Content-Type": "application/json"
-	//     },
-	//     body: JSON.stringify({
-	// 	"contents": [{
-	// 	    "parts": [{"text": prompt}]
-	// 	}]
-	//     })
-	// });
-	// if (! response.ok) {
-	//     alert(`Stream request failed: ${response.statusText}`);
-	//     return null;
-	// }
 
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
@@ -211,28 +152,6 @@ class ChatConnection {
     async audioStreamRequest(prompt, audioData, mimeType) {
 	const fileData = await this.uploadData(audioData, "audio", mimeType);
 	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}, {"file_data": fileData}], {});
-	// const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
-	//     method: "POST",
-	//     headers: {
-	// 	"Content-Type": "application/json"
-	//     },
-	//     body: JSON.stringify({
-	// 	"contents": [{
-	// 	    "parts": [
-	// 		{
-	// 		    "text": prompt,
-	// 		},
-	// 		{
-	// 		    "file_data": fileData
-	// 		}
-	// 	    ]
-	// 	}]
-	//     })
-	// });
-	// if (! response.ok) {
-	//     alert(`Audio request failed: ${response.statusText}`);
-	//     return null;
-	// }
 
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
