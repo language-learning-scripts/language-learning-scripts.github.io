@@ -9,11 +9,11 @@ function jsonListTransformer() {
 		const list = JSON.parse(hopefullyValidJSON);
 		for (elt of list) {
 		    controller.enqueue(elt.candidates[0].content.parts[0].text);
-		}		
+		}
 	    } catch(error) {
 		console.log(`Could not parse ${hopefullyValidJSON} as valid JSON. Skipping.`)
 	    }
-	}	
+	}
     });
 }
 
@@ -51,6 +51,10 @@ class TTSConnection {
 		"model": this.model
 	    })
 	});
+	if (! response.ok) {
+	    alert(`Simple request failed: ${response.statusText}`);
+	    return null;
+	}
 
 	const responseData = await response.json();
 	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
@@ -163,7 +167,7 @@ class ChatConnection {
 		"contents": [{
 		    "parts": [
 			{
-			    "text": prompt,			
+			    "text": prompt,
 			},
 			{
 			    "file_data": fileData
