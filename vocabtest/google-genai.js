@@ -52,8 +52,8 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
     if (! response.ok) {
 	body = await response.json();
 	console.log(body);
-	alert(`Google request failed: ${body}`);
-	throw Error(`Google request failed: ${response.statusText}`);
+	alert(`Google request failed: ${body.error.message}`);
+	throw Error(`Google request failed: ${body.error.message}`);
     }
 
     return response;
