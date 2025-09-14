@@ -19,6 +19,13 @@ class Status {
 	setTimeout(() => {this.clearStatus();}, 2000);
     }
 
+    pinStatus(msg) {
+	this.active = true;
+	const statusDiv = document.getElementById("status");
+	statusDiv.innerHTML = msg;
+	statusDiv.style.display = "inline";	
+    }
+
     clearStatus() {
 	if (this.active) {
 	    clearTimeout(this.timeoutId);
@@ -59,10 +66,10 @@ async function generateForeignSentence() {
     const entry = pick(vocab);
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
-    status.updateStatus("Generating sentence...");
+    status.pinStatus("Generating sentence...");
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
-    status.updateStatus("Converting sentence to audio...");
+    status.pinStatus("Converting sentence to audio...");
     pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
     status.updateStatus("Playing sentence...");
 

@@ -21,40 +21,83 @@ function getUrl(model, request) {
     return `https://generativelanguage.googleapis.com/v1beta/models/${model}:${request}?key=${googleApiKey}`;
 }
 
+function dictIsEmpty(dict) {
+    for (const prop in dict) {
+	return false;
+    }
+    return true;
+}
+
+async genericGoogleRequest(model, endpoint, contentParts, config) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${googleApiKey}`;
+
+    var request = {
+	"contents": [{
+	    "parts": contentParts
+	}],
+	"model": model
+    };
+    if (! dictIsEmpty(config)) {
+	request["generationConfig"] = config;
+    }
+    
+    const response = await fetch(url, {
+	method: "POST",
+	headers: {
+	    "Content-Type": "application/json"
+	},
+	body: JSON.stringify(request)
+    });
+
+    if (! response.ok) {
+	alert(`Google request failed: ${response.statusText}`);
+	throw Error(`Google request failed: ${response.statusText}`);
+    }
+
+    return response;
+}
+
+
 class TTSConnection {
     constructor() {
 	this.model = "gemini-2.5-flash-preview-tts";
     }
 
     async generateAudio(prompt) {
-	const response = await fetch(getUrl(this.model, "generateContent"), {
-	    method: "POST",
-	    headers: {
-		"Content-Type": "application/json"
-	    },
-	    body: JSON.stringify({
-		"contents": [{
-		    "parts": [{
-			"text": prompt
-		    }]
-		}],
-		"generationConfig": {
-		    "responseModalities": ["AUDIO"],
-		    "speechConfig": {
-			"voiceConfig": {
-			    "prebuiltVoiceConfig": {
-				"voiceName": "Kore"
-			    }
-			}
+	const response = await genericGoogleRequest(this.model, "generateContent", [{"text": prompt}], {
+	    "responseModalities": ["AUDIO"],
+	    "speechConfig": {
+		"voiceConfig": {
+		    "prebuiltVoiceConfig": {
+			"voiceName": "Kore"
 		    }
-		},
-		"model": this.model
-	    })
+		}
+	    }
 	});
-	if (! response.ok) {
-	    alert(`Simple request failed: ${response.statusText}`);
-	    return null;
-	}
+	// const response = await fetch(getUrl(this.model, "generateContent"), {
+	//     method: "POST",
+	//     headers: {
+	// 	"Content-Type": "application/json"
+	//     },
+	//     body: JSON.stringify({
+	// 	"contents": [{
+	// 	    "parts": [{
+	// 		"text": prompt
+	// 	    }]
+	// 	}],
+	// 	"generationConfig": {
+	// 	    "responseModalities": ["AUDIO"],
+	// 	    "speechConfig": {
+	// 		"voiceConfig": {
+	// 		    "prebuiltVoiceConfig": {
+	// 			"voiceName": "Kore"
+	// 		    }
+	// 		}
+	// 	    }
+	// 	},
+	// 	"model": this.model
+	//     })
+	// });
 
 	const responseData = await response.json();
 	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
@@ -74,42 +117,45 @@ class ChatConnection {
     // 	return `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:${request}?key=${googleApiKey}`;
     // }
 
+
     async simpleRequest(prompt) {
-	const response = await fetch(getUrl(this.model, "generateContent"), {
-	    method: "POST",
-	    headers: {
-		"Content-Type": "application/json"
-	    },
-	    body: JSON.stringify({
-		"contents": [{
-		    "parts": [{"text": prompt}]
-		}]
-	    })
-	});
-	if (! response.ok) {
-	    alert(`Simple request failed: ${response.statusText}`);
-	    return null;
-	}
+	const response = await genericGoogleRequest(this.model, "generateContent", [{"text": prompt}], {});
+	// const response = await fetch(getUrl(this.model, "generateContent"), {
+	//     method: "POST",
+	//     headers: {
+	// 	"Content-Type": "application/json"
+	//     },
+	//     body: JSON.stringify({
+	// 	"contents": [{
+	// 	    "parts": [{"text": prompt}]
+	// 	}]
+	//     })
+	// });
+	// if (! response.ok) {
+	//     alert(`Simple request failed: ${response.statusText}`);
+	//     return null;
+	// }
 	const response_data = await response.json();
 	return response_data.candidates[0].content.parts[0].text;
     }
 
     async streamRequest(prompt) {
-	const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
-	    method: "POST",
-	    headers: {
-		"Content-Type": "application/json"
-	    },
-	    body: JSON.stringify({
-		"contents": [{
-		    "parts": [{"text": prompt}]
-		}]
-	    })
-	});
-	if (! response.ok) {
-	    alert(`Stream request failed: ${response.statusText}`);
-	    return null;
-	}
+	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}], {});
+	// const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
+	//     method: "POST",
+	//     headers: {
+	// 	"Content-Type": "application/json"
+	//     },
+	//     body: JSON.stringify({
+	// 	"contents": [{
+	// 	    "parts": [{"text": prompt}]
+	// 	}]
+	//     })
+	// });
+	// if (! response.ok) {
+	//     alert(`Stream request failed: ${response.statusText}`);
+	//     return null;
+	// }
 
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
@@ -158,28 +204,29 @@ class ChatConnection {
 
     async audioStreamRequest(prompt, audioData, mimeType) {
 	const fileData = await this.uploadData(audioData, "audio", mimeType);
-	const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
-	    method: "POST",
-	    headers: {
-		"Content-Type": "application/json"
-	    },
-	    body: JSON.stringify({
-		"contents": [{
-		    "parts": [
-			{
-			    "text": prompt,
-			},
-			{
-			    "file_data": fileData
-			}
-		    ]
-		}]
-	    })
-	});
-	if (! response.ok) {
-	    alert(`Audio request failed: ${response.statusText}`);
-	    return null;
-	}
+	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}, {"file_data: fileData"}], {});
+	// const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
+	//     method: "POST",
+	//     headers: {
+	// 	"Content-Type": "application/json"
+	//     },
+	//     body: JSON.stringify({
+	// 	"contents": [{
+	// 	    "parts": [
+	// 		{
+	// 		    "text": prompt,
+	// 		},
+	// 		{
+	// 		    "file_data": fileData
+	// 		}
+	// 	    ]
+	// 	}]
+	//     })
+	// });
+	// if (! response.ok) {
+	//     alert(`Audio request failed: ${response.statusText}`);
+	//     return null;
+	// }
 
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
