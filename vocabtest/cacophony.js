@@ -67,35 +67,40 @@ async function generateForeignSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
     status.pinStatus("Generating sentence...");
-    const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
+    try {
+	const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
-    status.pinStatus("Converting sentence to audio...");
-    pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
-    status.updateStatus("Playing sentence...");
+	status.pinStatus("Converting sentence to audio...");
+	pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
+	status.updateStatus("Playing sentence...");
 
-    await playPCM(pcmData);
+	await playPCM(pcmData);
 
-    const repeatButton = document.getElementById("repeatQuestion");
-    repeatButton.onclick = (e) => {
-	playPCM(pcmData);
-    };
-    repeatButton.disabled = false;
+	const repeatButton = document.getElementById("repeatQuestion");
+	repeatButton.onclick = (e) => {
+	    playPCM(pcmData);
+	};
+	repeatButton.disabled = false;
 
-    const tryAnswerButton = document.getElementById("tryAnswer");
-    tryAnswerButton.onclick = (e) => {
-	listenAssess(testSentence, document.getElementById("answerInput").value);
-    };
-    tryAnswerButton.disabled = false;
-    document.getElementById("answerInputForm").onsubmit = (e) => {
-	listenAssess(testSentence, document.getElementById("answerInput").value);
-	e.preventDefault();
-    };
+	const tryAnswerButton = document.getElementById("tryAnswer");
+	tryAnswerButton.onclick = (e) => {
+	    listenAssess(testSentence, document.getElementById("answerInput").value);
+	};
+	tryAnswerButton.disabled = false;
+	document.getElementById("answerInputForm").onsubmit = (e) => {
+	    listenAssess(testSentence, document.getElementById("answerInput").value);
+	    e.preventDefault();
+	};
 
-    const showAnswerButton = document.getElementById("listenShowAnswer");
-    showAnswerButton.onclick = (e) => {
-	listenShowAnswer(testSentence);
-    };
-    showAnswerButton.disabled = false;
+	const showAnswerButton = document.getElementById("listenShowAnswer");
+	showAnswerButton.onclick = (e) => {
+	    listenShowAnswer(testSentence);
+	};
+	showAnswerButton.disabled = false;
+    } catch (err) {
+	status.clearStatus();
+	alert(err.message);
+    }
 }
 
 async function streamToElement(stream, answerElement) {

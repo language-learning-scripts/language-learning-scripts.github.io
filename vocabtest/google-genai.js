@@ -28,6 +28,12 @@ function dictIsEmpty(dict) {
     return true;
 }
 
+class GoogleRequestError extends Error {
+    constructor(body) {
+	super(`Google request failed: ${body.error.message}`);
+    }
+}
+
 async function genericGoogleRequest(model, endpoint, contentParts, config) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${googleApiKey}`;
 
@@ -51,9 +57,7 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
 
     if (! response.ok) {
 	body = await response.json();
-	console.log(body);
-	alert(`Google request failed: ${body.error.message}`);
-	throw Error(`Google request failed: ${body.error.message}`);
+	throw GoogleRequestError(body);
     }
 
     return response;
