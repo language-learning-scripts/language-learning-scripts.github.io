@@ -2,6 +2,7 @@
     "name": "Cacophony",
     "start_url": "cacophony.html",
     "scope": ".",
+    "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#317EFB",
     "description": "Test speaking and listening.",
