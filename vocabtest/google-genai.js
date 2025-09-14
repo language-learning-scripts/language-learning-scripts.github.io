@@ -28,7 +28,7 @@ function dictIsEmpty(dict) {
     return true;
 }
 
-async genericGoogleRequest(model, endpoint, contentParts, config) {
+async function genericGoogleRequest(model, endpoint, contentParts, config) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${googleApiKey}`;
 
     var request = {
