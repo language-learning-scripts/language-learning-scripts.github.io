@@ -204,7 +204,7 @@ class ChatConnection {
 
     async audioStreamRequest(prompt, audioData, mimeType) {
 	const fileData = await this.uploadData(audioData, "audio", mimeType);
-	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}, {"file_data: fileData"}], {});
+	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}, {"file_data": fileData}], {});
 	// const response = await fetch(getUrl(this.model, "streamGenerateContent"), {
 	//     method: "POST",
 	//     headers: {
