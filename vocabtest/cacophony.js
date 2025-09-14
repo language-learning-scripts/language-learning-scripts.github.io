@@ -2,6 +2,36 @@ function pick(array) {
     return array[Math.floor(Math.random() * array.length)];
 }
 
+class Status {
+    constructor() {
+	this.active = false;
+	this.timeoutId = null;
+    }
+
+    updateStatus(msg) {
+	if (this.active) {
+	    clearTimeout(this.timeoutId);
+	}
+	this.active = true;
+	const statusDiv = document.getElementById("status");
+	statusDiv.innerHTML = msg;
+	statusDiv.style.display = "inline";
+	setTimeout(() => {this.clearStatus();}, 2000);
+    }
+
+    clearStatus() {
+	if (this.active) {
+	    clearTimeout(this.timeoutId);
+	}
+	this.active = false;
+	const statusDiv = document.getElementById("status");
+	statusDiv.innerHTML = "";
+	statusDiv.style.display = "none";
+    }
+}
+
+status = new Status();
+
 function trimCodeblock(str) {
     if (str.substring(0, 8) == "```html\n") {
 	str = str.substring(8);
@@ -29,9 +59,12 @@ async function generateForeignSentence() {
     const entry = pick(vocab);
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
+    status.updateStatus("Generating sentence...");
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
+    status.updateStatus("Converting sentence to audio...");
     pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
+    status.updateStatus("Playing sentence...");
 
     await playPCM(pcmData);
 
@@ -76,7 +109,7 @@ function disableListenButtons() {
 function disableSpeakButtons() {
     for (id of ["toggleRecording", "generateEnglishSentence", "speakShowAnswer"]) {
 	document.getElementById(id).disabled = true;
-    }    
+    }
 }
 
 async function listenAssess(testSentence, userAnswer) {
@@ -102,6 +135,7 @@ async function generateEnglishSentence() {
 
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in English for them to translate into ${languageName()}. The sentence should test their knowledge of the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the English sentence and no other text.`
 
+    status.updateStatus("Requesting sentence...")
     const testPhrase = await chatConnection.simpleRequest(testPhrasePrompt);
     document.getElementById("question").innerHTML = testPhrase;
     const toggleRecordButton = document.getElementById("toggleRecording");
@@ -163,9 +197,13 @@ async function speakShowAnswer(questionPhrase) {
 function listenMode() {
     document.getElementById("speakPanel").style.display = "none";
     document.getElementById("listenPanel").style.display = "flex";
+    document.getElementById("listenTitle").className = "active";
+    document.getElementById("speakTitle").className = "inactive";
 }
 
 function speakMode() {
     document.getElementById("listenPanel").style.display = "none";
     document.getElementById("speakPanel").style.display = "flex";
+    document.getElementById("listenTitle").className = "inactive";
+    document.getElementById("speakTitle").className = "active";
 }

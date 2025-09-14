@@ -82,6 +82,10 @@ class ChatConnection {
 		}]
 	    })
 	});
+	if (! response.ok) {
+	    alert(`Simple request failed: ${response.statusText}`);
+	    return null;
+	}
 	const response_data = await response.json();
 	return response_data.candidates[0].content.parts[0].text;
     }
@@ -98,6 +102,11 @@ class ChatConnection {
 		}]
 	    })
 	});
+	if (! response.ok) {
+	    alert(`Stream request failed: ${response.statusText}`);
+	    return null;
+	}
+
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
 	  .pipeThrough(jsonListTransformer());
@@ -119,7 +128,10 @@ class ChatConnection {
 		}
 	    })
 	});
-
+	if (! response.ok) {
+	    alert(`Upload request failed: ${response.statusText}`);
+	    return null;
+	}
 
 	const uploadUrl = response.headers.get("X-Goog-Upload-Url");
 
@@ -160,6 +172,11 @@ class ChatConnection {
 		}]
 	    })
 	});
+	if (! response.ok) {
+	    alert(`Audio request failed: ${response.statusText}`);
+	    return null;
+	}
+
 	return response.body
 	  .pipeThrough(new TextDecoderStream())
 	  .pipeThrough(jsonListTransformer());

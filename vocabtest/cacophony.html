@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Listening Test</title>
+    <title>Cacophony</title>
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <link rel="icon" type="image/png" href="logo32.png" />
     <link rel="stylesheet" type="text/css" href="./cacophony.css" />
@@ -13,8 +13,8 @@
   </head>
   <body onload="loadSettings();">
     <div id="heading">
-      <h1 onclick="listenMode();">Listening Test</h1>
-      <h1 onclick="speakMode();">Speaking Test</h1>
+      <h1 onclick="listenMode();" class="active" id="listenTitle">Listening Test</h1>
+      <h1 onclick="speakMode();" class="inactive" id="speakTitle">Speaking Test</h1>
     </div>
     <div id="listenPanel" class="mainPanel">
       <div id="answerInputDiv">
@@ -56,5 +56,6 @@
 	<button onclick="collectSettings();">Save</button>
       </div>
     </div>
+    <div id="status">Status goes here</div>
   </body>
 </html>

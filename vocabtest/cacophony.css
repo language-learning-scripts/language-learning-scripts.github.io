@@ -12,6 +12,29 @@ html, body {
     justify-content: space-evenly;
 }
 
+.active {
+    color: black;
+    text-decoration: underline;
+}
+
+.inactive {
+    color: dimgrey;
+}
+
+#status {
+    display: none;
+    position: absolute;
+    background-color: green;
+    font-size: large;
+    top: 50%;
+    left: 50%;
+    padding: 20px;
+    opacity: 80%;
+    border-radius: 20px;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+}
+
 .mainPanel {
     min-height: 0;
     display: flex;
@@ -33,6 +56,7 @@ html, body {
 h1 {
     font-family: monospace;
     text-align: center;
+    cursor: pointer;
 }
 
 button {
