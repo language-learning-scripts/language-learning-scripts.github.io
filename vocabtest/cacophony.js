@@ -30,7 +30,7 @@ class Status {
     }
 }
 
-status = new Status();
+const status = new Status();
 
 function trimCodeblock(str) {
     if (str.substring(0, 8) == "```html\n") {
