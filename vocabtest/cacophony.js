@@ -67,40 +67,35 @@ async function generateForeignSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
     status.pinStatus("Generating sentence...");
-    try {
-	const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
+    const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
-	status.pinStatus("Converting sentence to audio...");
-	pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
-	status.updateStatus("Playing sentence...");
+    status.pinStatus("Converting sentence to audio...");
+    pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
+    status.updateStatus("Playing sentence...");
 
-	await playPCM(pcmData);
+    await playPCM(pcmData);
 
-	const repeatButton = document.getElementById("repeatQuestion");
-	repeatButton.onclick = (e) => {
-	    playPCM(pcmData);
-	};
-	repeatButton.disabled = false;
+    const repeatButton = document.getElementById("repeatQuestion");
+    repeatButton.onclick = (e) => {
+	playPCM(pcmData);
+    };
+    repeatButton.disabled = false;
 
-	const tryAnswerButton = document.getElementById("tryAnswer");
-	tryAnswerButton.onclick = (e) => {
-	    listenAssess(testSentence, document.getElementById("answerInput").value);
-	};
-	tryAnswerButton.disabled = false;
-	document.getElementById("answerInputForm").onsubmit = (e) => {
-	    listenAssess(testSentence, document.getElementById("answerInput").value);
-	    e.preventDefault();
-	};
+    const tryAnswerButton = document.getElementById("tryAnswer");
+    tryAnswerButton.onclick = (e) => {
+	listenAssess(testSentence, document.getElementById("answerInput").value);
+    };
+    tryAnswerButton.disabled = false;
+    document.getElementById("answerInputForm").onsubmit = (e) => {
+	listenAssess(testSentence, document.getElementById("answerInput").value);
+	e.preventDefault();
+    };
 
-	const showAnswerButton = document.getElementById("listenShowAnswer");
-	showAnswerButton.onclick = (e) => {
-	    listenShowAnswer(testSentence);
-	};
-	showAnswerButton.disabled = false;
-    } catch (err) {
-	status.clearStatus();
-	alert(err.message);
-    }
+    const showAnswerButton = document.getElementById("listenShowAnswer");
+    showAnswerButton.onclick = (e) => {
+	listenShowAnswer(testSentence);
+    };
+    showAnswerButton.disabled = false;
 }
 
 async function streamToElement(stream, answerElement) {
@@ -126,7 +121,7 @@ function disableSpeakButtons() {
 
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
-    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was ${userAnswer}. How did I do? How good is it? Format your answer as HTML.`;
+    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do? How good is it? Format your answer as HTML.`;
     const assessStream = await chatConnection.streamRequest(prompt);
     await streamToElement(assessStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
@@ -218,4 +213,8 @@ function speakMode() {
     document.getElementById("speakPanel").style.display = "flex";
     document.getElementById("listenTitle").className = "inactive";
     document.getElementById("speakTitle").className = "active";
+}
+
+onerror = (msg, src, line, col, error) => {
+    alert(msg);
 }
