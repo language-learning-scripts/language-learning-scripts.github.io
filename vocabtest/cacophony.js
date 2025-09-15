@@ -216,11 +216,11 @@ function speakMode() {
 }
 
 window.onerror = (msg, src, line, col, error) => {
-    console.log("error");
+    status.clearStatus();
     alert(msg);
 }
 
 window.onunhandledrejection = (ev) => {
-    console.log("promise rejection");
+    status.clearStatus();
     alert(ev.reason);
 }
