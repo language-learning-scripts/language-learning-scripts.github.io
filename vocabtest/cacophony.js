@@ -215,6 +215,12 @@ function speakMode() {
     document.getElementById("speakTitle").className = "active";
 }
 
-onerror = (msg, src, line, col, error) => {
+window.onerror = (msg, src, line, col, error) => {
+    console.log("error");
     alert(msg);
+}
+
+window.onunhandledrejection = (ev) => {
+    console.log("promise rejection");
+    alert(ev.reason);
 }
