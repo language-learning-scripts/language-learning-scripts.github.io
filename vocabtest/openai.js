@@ -65,7 +65,7 @@ class DeltaTransformer extends TransformStream {
 		    controller.terminate()
 		} else {
 		    const decodedMessage = JSON.parse(chunk.data);
-		    if (decodedMessage.object == "chat.completion.chunk") {
+		    if (decodedMessage.object == "chat.completion.chunk" && "content" in decodedMessage.choices[0].delta) {
 			controller.enqueue(decodedMessage.choices[0].delta.content);
 			
 		    }
