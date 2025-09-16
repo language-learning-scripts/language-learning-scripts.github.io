@@ -70,7 +70,7 @@ async function generateForeignSentence() {
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
     status.pinStatus("Converting sentence to audio...");
-    pcmData = await ttsConnection.generateAudio("Read the following Slovene sentence clearly, for someone who is still learning Slovene", testSentence);
+    pcmData = await ttsConnection.generateAudio("Read the following Slovene sentence slowly and clearly, for someone who is still learning Slovene", testSentence);
     status.updateStatus("Playing sentence...");
 
     await playPCM(pcmData);
@@ -121,7 +121,7 @@ function disableSpeakButtons() {
 
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
-    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do? How good is it? Format your answer as HTML.`;
+    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do? Format your answer as HTML.`;
     const assessStream = await chatConnection.streamRequest(prompt);
     await streamToElement(assessStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
@@ -130,7 +130,7 @@ async function listenAssess(testSentence, userAnswer) {
 async function listenShowAnswer(testSentence) {
     disableListenButtons();
     const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please help. Format your response as plain HTML.`
+	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it. Format your response as HTML.`
     );
     await streamToElement(answerStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
