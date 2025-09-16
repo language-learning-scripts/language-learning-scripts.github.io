@@ -182,7 +182,7 @@ async function recordAnswer(testPhrase) {
 async function speakAssess(testPhrase, wavData) {
     disableSpeakButtons();
     const assessmentStream = await chatConnection.audioStreamRequest(
-	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Format your answer as HTML.`,
+	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Say what you understood of my answer and point out any mistakes you noticed. Format your answer as HTML.`,
 	wavData,
 	"audio/wav"
     );
