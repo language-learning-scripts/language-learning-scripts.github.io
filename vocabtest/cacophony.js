@@ -70,7 +70,7 @@ async function generateForeignSentence() {
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
     status.pinStatus("Converting sentence to audio...");
-    pcmData = await ttsConnection.generateAudio(`Read the following Slovene sentence clearly, for someone who is still learning Slovene: ${testSentence}`);
+    pcmData = await ttsConnection.generateAudio("Read the following Slovene sentence clearly, for someone who is still learning Slovene", testSentence);
     status.updateStatus("Playing sentence...");
 
     await playPCM(pcmData);

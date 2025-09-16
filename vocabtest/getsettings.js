@@ -1,5 +1,5 @@
-var googleApiKey = "";
-var model = "gemini-2.0-flash";
+var openaiApiKey = "";
+var model = "gpt-4o-mini";
 var language = "";
 var vocab = []
 
@@ -12,29 +12,29 @@ const supportedLanguages = {
 
 function activateSettingsModal() {
     keyEntry = document.getElementById("apiKeyEntry");
-    keyEntry.value = googleApiKey;
+    keyEntry.value = openaiApiKey;
     document.getElementById("modelEntry").value = model;
     document.getElementById("settingsOverlay").style.display = "block";
 }
 
 function loadSettings() {
     model = localStorage.getItem("cacophonyModel");
-    googleApiKey = localStorage.getItem("googleApiKey");
+    openaiApiKey = localStorage.getItem("openaiApiKey");
     language = localStorage.getItem("cacophonyLanguage");
-    if (! googleApiKey || ! language in supportedLanguages) {
+    if (! openaiApiKey || ! language in supportedLanguages) {
 	activateSettingsModal();
     }
 }
 
 function collectSettings() {
-    googleApiKey = document.getElementById("apiKeyEntry").value;
+    openaiApiKey = document.getElementById("apiKeyEntry").value;
     model = document.getElementById("modelEntry").value;
     newLanguage = document.getElementById("language").value;
     if (newLanguage != language) {
 	vocab = [];
     }
     language = newLanguage;
-    localStorage.setItem("googleApiKey", googleApiKey);
+    localStorage.setItem("openaiApiKey", openaiApiKey);
     localStorage.setItem("cacophonyModel", model);
     localStorage.setItem("cacophonyLanguage", language);
     document.getElementById("settingsOverlay").style.display = "none";
