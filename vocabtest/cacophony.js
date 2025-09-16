@@ -182,7 +182,7 @@ async function recordAnswer(testPhrase) {
 async function speakAssess(testPhrase, wavData) {
     disableSpeakButtons();
     const assessmentStream = await chatConnection.audioStreamRequest(
-	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How good is it? Format your answer as HTML.`,
+	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Format your answer as HTML.`,
 	wavData,
 	"audio/wav"
     );
@@ -194,7 +194,7 @@ async function speakAssess(testPhrase, wavData) {
 async function speakShowAnswer(questionPhrase) {
     disableSpeakButtons();
     const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please help. Format your response as plain HTML.`
+	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it. Format your response as HTML.`
     );
 
     await streamToElement(answerStream, document.getElementById("speakAssess"));

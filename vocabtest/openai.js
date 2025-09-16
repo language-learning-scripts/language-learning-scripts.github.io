@@ -105,7 +105,7 @@ class TTSConnection {
 
 class ChatConnection {
     constructor() {
-	this.model = "gpt-4.1-nano";
+	this.model = "gpt-4.1-mini";
 	this.audioModel = "gpt-4o-mini-audio-preview";
 	this.apiKey = openaiApiKey;
     }
