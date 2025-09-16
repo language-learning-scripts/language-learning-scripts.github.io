@@ -86,7 +86,7 @@ class TTSConnection {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json",
-		"Authorization": `Bearer ${this.apiKey}`		
+		"Authorization": `Bearer ${openaiApiKey}`		
 	    },
 	    body: JSON.stringify({
 		"input": text,
@@ -117,7 +117,7 @@ class ChatConnection {
 	    method: "POST",
 	    headers: {
 		"Content-Type": "application/json",
-		"Authorization": `Bearer ${this.apiKey}`		
+		"Authorization": `Bearer ${openaiApiKey}`		
 	    },
 	    body: JSON.stringify(request)
 	})
