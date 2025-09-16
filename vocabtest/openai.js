@@ -97,9 +97,7 @@ class TTSConnection {
 	    })
 	});
 
-	const responseData = await response.json();
-	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
-	const audioData = Uint8Array.fromBase64(base64Audio);
+	const audioData = await response.bytes();
 
 	return audioData;
     }
