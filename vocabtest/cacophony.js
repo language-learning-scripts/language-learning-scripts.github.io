@@ -102,8 +102,8 @@ async function streamToElement(stream, answerElement) {
     answerText = "";
     for await (chunk of stream) {
 	answerText += chunk;
-	answerText = trimCodeblock(answerText);
-	answerElement.innerHTML = answerText;
+//	answerText = trimCodeblock(answerText);
+	answerElement.innerHTML = marked.parse(answerText);
     }
 }
 
@@ -121,7 +121,7 @@ function disableSpeakButtons() {
 
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
-    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do? Format your answer as HTML.`;
+    const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do?`;
     const assessStream = await chatConnection.streamRequest(prompt);
     await streamToElement(assessStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
@@ -130,7 +130,7 @@ async function listenAssess(testSentence, userAnswer) {
 async function listenShowAnswer(testSentence) {
     disableListenButtons();
     const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it. Format your response as HTML.`
+	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it.`
     );
     await streamToElement(answerStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
@@ -182,7 +182,7 @@ async function recordAnswer(testPhrase) {
 async function speakAssess(testPhrase, wavData) {
     disableSpeakButtons();
     const assessmentStream = await chatConnection.audioStreamRequest(
-	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Say what you understood of my answer and point out any mistakes you noticed. Format your answer as HTML.`,
+	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Say what you understood of my answer and point out any mistakes you noticed.`,
 	wavData,
 	"audio/wav"
     );
@@ -194,7 +194,7 @@ async function speakAssess(testPhrase, wavData) {
 async function speakShowAnswer(questionPhrase) {
     disableSpeakButtons();
     const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it. Format your response as HTML.`
+	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it.`
     );
 
     await streamToElement(answerStream, document.getElementById("speakAssess"));
