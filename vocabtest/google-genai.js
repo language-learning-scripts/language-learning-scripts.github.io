@@ -64,7 +64,7 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
 }
 
 
-class TTSConnection {
+class TTSConnectionGemini {
     constructor() {
 	this.model = "gemini-2.5-flash-preview-tts";
     }
@@ -89,10 +89,56 @@ class TTSConnection {
     }
 }
 
+class TTSConnection {
+    async generateAudio(textToSynthesize) {
+	
+	const apiUrl = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`;
+
+	const requestBody = {
+            input: {
+		text: textToSynthesize
+            },
+            voice: {
+		languageCode: 'sl-SI',
+		name: 'sl-SI-Chirp3-HD-Callirrhoe'
+            },
+            audioConfig: {
+		audioEncoding: 'MP3'
+            }
+	};
+
+	try {
+            const response = await fetch(apiUrl, {
+		method: 'POST',
+		headers: {
+                    'Content-Type': 'application/json'
+		},
+		body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+		const errorData = await response.json();
+		throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+
+            if (data && data.audioContent) {
+		return data.audioContent; // This is the base64-encoded audio string
+            } else {
+		throw new Error('No audio content received in the response.');
+            }
+
+	} catch (error) {
+            console.error('Error synthesizing speech:', error);
+            throw error; // Re-throw the error for the caller to handle
+	}
+    }	
+}
+
 class ChatConnection {
     constructor() {
 	this.model = "gemini-2.0-flash";
-	this.systemPrompt = "Format your answer as HTML."
     }
 
     async simpleRequest(prompt) {
@@ -110,7 +156,7 @@ class ChatConnection {
     }
 
     async uploadData(data, filename, mimeType) {
-	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleApiKey}`, {
+	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${geminiApiKey}`, {
 	    method: "POST",
 	    headers: {
 		"X-Goog-Upload-Protocol": "resumable",

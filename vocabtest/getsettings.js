@@ -1,4 +1,4 @@
-var openaiApiKey = "";
+var googleApiKey = "";
 var model = "gpt-4o-mini";
 var language = "";
 var vocab = []
@@ -12,14 +12,15 @@ const supportedLanguages = {
 
 function activateSettingsModal() {
     keyEntry = document.getElementById("apiKeyEntry");
-    keyEntry.value = openaiApiKey;
+    keyEntry.value = googleApiKey;
     document.getElementById("modelEntry").value = model;
     document.getElementById("settingsOverlay").style.display = "block";
 }
 
 function loadSettings() {
     model = localStorage.getItem("cacophonyModel");
-    openaiApiKey = localStorage.getItem("openaiApiKey");
+    googleApiKey = localStorage.getItem("googleApiKey");
+    
     language = localStorage.getItem("cacophonyLanguage");
     if (! openaiApiKey || ! language in supportedLanguages) {
 	activateSettingsModal();
@@ -34,7 +35,7 @@ function collectSettings() {
 	vocab = [];
     }
     language = newLanguage;
-    localStorage.setItem("openaiApiKey", openaiApiKey);
+    localStorage.setItem("googleApiKey", googleApiKey);
     localStorage.setItem("cacophonyModel", model);
     localStorage.setItem("cacophonyLanguage", language);
     document.getElementById("settingsOverlay").style.display = "none";

@@ -70,14 +70,15 @@ async function generateForeignSentence() {
     const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
 
     status.pinStatus("Converting sentence to audio...");
-    pcmData = await ttsConnection.generateAudio("Read the following Slovene sentence slowly and clearly, for someone who is still learning Slovene", testSentence);
+    mp3Data = await ttsConnection.generateAudio(testSentence);
     status.updateStatus("Playing sentence...");
 
-    await playPCM(pcmData);
+    //await playPCM(pcmData);
+    playMP3Base64(mp3Data);
 
     const repeatButton = document.getElementById("repeatQuestion");
     repeatButton.onclick = (e) => {
-	playPCM(pcmData);
+	playMP3Base64(mp3Data);
     };
     repeatButton.disabled = false;
 
