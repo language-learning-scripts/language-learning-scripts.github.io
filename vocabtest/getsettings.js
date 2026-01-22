@@ -22,7 +22,7 @@ function loadSettings() {
     googleApiKey = localStorage.getItem("googleApiKey");
     
     language = localStorage.getItem("cacophonyLanguage");
-    if (! openaiApiKey || ! language in supportedLanguages) {
+    if (! googleApiKey || ! language in supportedLanguages) {
 	activateSettingsModal();
     }
 }
