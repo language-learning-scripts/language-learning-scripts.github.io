@@ -103,7 +103,8 @@ class TTSConnection {
 		name: 'sl-SI-Chirp3-HD-Callirrhoe'
             },
             audioConfig: {
-		audioEncoding: 'MP3'
+		audioEncoding: 'MP3',
+		speakingRate: 0.8
             }
 	};
 
@@ -156,7 +157,7 @@ class ChatConnection {
     }
 
     async uploadData(data, filename, mimeType) {
-	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${geminiApiKey}`, {
+	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleApiKey}`, {
 	    method: "POST",
 	    headers: {
 		"X-Goog-Upload-Protocol": "resumable",
