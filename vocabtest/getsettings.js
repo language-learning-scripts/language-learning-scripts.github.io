@@ -28,7 +28,7 @@ function loadSettings() {
 }
 
 function collectSettings() {
-    openaiApiKey = document.getElementById("apiKeyEntry").value;
+    googleApiKey = document.getElementById("apiKeyEntry").value;
     model = document.getElementById("modelEntry").value;
     newLanguage = document.getElementById("language").value;
     if (newLanguage != language) {
