@@ -39,26 +39,6 @@ class Status {
 
 const status = new Status();
 
-function trimCodeblock(str) {
-    if (str.substring(0, 8) == "```html\n") {
-	str = str.substring(8);
-    }
-    if (str.length > 12 && str.substring(str.length - 4, str.length) == "```\n") {
-	str = str.substring(0, str.length - 4);
-    } else if (str.length > 11 && str.substring(str.length - 3, str.length) == "```") {
-	str = str.substring(0, str.length - 3);
-    }
-
-    return str;
-}
-
-foreignWordlist = ["meza", "dan"]
-
-const chatConnection = new ChatConnection();
-const ttsConnection = new TTSConnection();
-
-var pcmData = null;
-
 async function generateForeignSentence() {
     document.getElementById("listenAssess").innerHTML = "";
     document.getElementById("answerInput").value = "";
@@ -67,13 +47,12 @@ async function generateForeignSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
 
     status.pinStatus("Generating sentence...");
-    const testSentence = await chatConnection.simpleRequest(testPhrasePrompt);
+    const testSentence = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 2.0});
 
     status.pinStatus("Converting sentence to audio...");
-    mp3Data = await ttsConnection.generateAudio(testSentence);
+    mp3Data = await generateAudio(testSentence, pick(languageData().male_voices.concat(languageData().female_voices)));
     status.updateStatus("Playing sentence...");
 
-    //await playPCM(pcmData);
     playMP3Base64(mp3Data);
 
     const repeatButton = document.getElementById("repeatQuestion");
@@ -103,7 +82,6 @@ async function streamToElement(stream, answerElement) {
     answerText = "";
     for await (chunk of stream) {
 	answerText += chunk;
-//	answerText = trimCodeblock(answerText);
 	answerElement.innerHTML = marked.parse(answerText);
     }
 }
@@ -123,15 +101,15 @@ function disableSpeakButtons() {
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
     const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do?`;
-    const assessStream = await chatConnection.streamRequest(prompt);
+    const assessStream = await streamRequest(prompt, assessModel);
     await streamToElement(assessStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
 }
 
 async function listenShowAnswer(testSentence) {
     disableListenButtons();
-    const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it.`
+    const answerStream = await streamRequest(
+	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it.`, assessModel
     );
     await streamToElement(answerStream, document.getElementById("listenAssess"));
     document.getElementById("generateForeignSentence").disabled = false;
@@ -144,7 +122,7 @@ async function generateEnglishSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in English for them to translate into ${languageName()}. The sentence should test their knowledge of the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the English sentence and no other text.`
 
     status.updateStatus("Requesting sentence...")
-    const testPhrase = await chatConnection.simpleRequest(testPhrasePrompt);
+    const testPhrase = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 2.0});
     document.getElementById("question").innerHTML = testPhrase;
     const toggleRecordButton = document.getElementById("toggleRecording");
     toggleRecordButton.innerHTML = "Ready to speak";
@@ -182,10 +160,11 @@ async function recordAnswer(testPhrase) {
 
 async function speakAssess(testPhrase, wavData) {
     disableSpeakButtons();
-    const assessmentStream = await chatConnection.audioStreamRequest(
+    const assessmentStream = await audioStreamRequest(
 	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Say what you understood of my answer and point out any mistakes you noticed.`,
 	wavData,
-	"audio/wav"
+	"audio/wav",
+	assessModel
     );
 
     await streamToElement(assessmentStream, document.getElementById("speakAssess"));
@@ -194,8 +173,8 @@ async function speakAssess(testPhrase, wavData) {
 
 async function speakShowAnswer(questionPhrase) {
     disableSpeakButtons();
-    const answerStream = await chatConnection.streamRequest(
-	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it.`
+    const answerStream = await streamRequest(
+	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it.`, assessModel
     );
 
     await streamToElement(answerStream, document.getElementById("speakAssess"));

@@ -34,7 +34,7 @@ class GoogleRequestError extends Error {
     }
 }
 
-async function genericGoogleRequest(model, endpoint, contentParts, config) {
+async function genericGoogleRequest(model, endpoint, contentParts, config = {}) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:${endpoint}?key=${googleApiKey}`;
 
     var request = {
@@ -63,145 +63,115 @@ async function genericGoogleRequest(model, endpoint, contentParts, config) {
     return response;
 }
 
+async function generateAudio(textToSynthesize, voice) {
+    
+    const apiUrl = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`;
 
-class TTSConnectionGemini {
-    constructor() {
-	this.model = "gemini-2.5-flash-preview-tts";
+    const requestBody = {
+        input: {
+	    text: textToSynthesize
+        },
+        voice: {
+	    languageCode: supportedLanguages[language]["ttsLanguageCode"],
+	    name: voice,
+        },
+        audioConfig: {
+	    audioEncoding: 'MP3',
+	    speakingRate: 0.8
+        }
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+	    method: 'POST',
+	    headers: {
+                'Content-Type': 'application/json'
+	    },
+	    body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+	    const errorData = await response.json();
+	    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error.message}`);
+        }
+
+        const data = await response.json();
+
+        if (data && data.audioContent) {
+	    return data.audioContent; // This is the base64-encoded audio string
+        } else {
+	    throw new Error('No audio content received in the response.');
+        }
+
+    } catch (error) {
+        console.error('Error synthesizing speech:', error);
+        throw error; // Re-throw the error for the caller to handle
     }
+}
 
-    async generateAudio(prompt) {
-	const response = await genericGoogleRequest(this.model, "generateContent", [{"text": prompt}], {
-	    "responseModalities": ["AUDIO"],
-	    "speechConfig": {
-		"voiceConfig": {
-		    "prebuiltVoiceConfig": {
-			"voiceName": "Kore"
-		    }
-		}
+async function simpleGenRequest(prompt, model, config = {}) {
+    const response = await genericGoogleRequest(model, "generateContent", [{"text": prompt}], config);
+    const response_data = await response.json();
+    return response_data.candidates[0].content.parts[0].text;
+}
+
+async function streamRequest(prompt, model, config = {}) {
+    const response = await genericGoogleRequest(model, "streamGenerateContent", [{"text": prompt}], config);
+
+    return response.body
+	.pipeThrough(new TextDecoderStream())
+	.pipeThrough(jsonListTransformer());
+}
+
+async function uploadData(data, filename, mimeType) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleApiKey}`, {
+	method: "POST",
+	headers: {
+	    "X-Goog-Upload-Protocol": "resumable",
+	    "X-Goog-Upload-Command": "start",
+	    "X-Goog-Upload-Header-Content-Length": data.size,
+	    "X-Goog-Upload.Header-Content-Type": mimeType,
+	    "Content-Type": "application/json"
+	},
+	body: JSON.stringify({
+	    "file": {
+		"display_name": filename
 	    }
-	});
-
-	const responseData = await response.json();
-	const base64Audio = responseData.candidates[0].content.parts[0].inlineData.data;
-	const audioData = Uint8Array.fromBase64(base64Audio);
-
-	return audioData;
+	})
+    });
+    if (! response.ok) {
+	alert(`Upload request failed: ${response.statusText}`);
+	return null;
     }
+
+    const uploadUrl = response.headers.get("X-Goog-Upload-Url");
+
+    const response2 = await fetch(uploadUrl, {
+	method: "POST",
+	headers: {
+	    "Content-Length": data.size,
+	    "X-Goog-Upload-Offset": 0,
+	    "X-Goog-Upload-Command": "upload, finalize"
+	},
+	body: data
+    });
+
+    const responseData = await response2.json();
+    return {
+	"file_uri": responseData.file.uri,
+	"mime_type": responseData.file.mimeType
+    };
 }
 
-class TTSConnection {
-    async generateAudio(textToSynthesize) {
-	
-	const apiUrl = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`;
+async function audioStreamRequest(prompt, audioData, mimeType, model, config = {}) {
+    const fileData = await uploadData(audioData, "audio", mimeType);
+    const response = await genericGoogleRequest(model, "streamGenerateContent", [{"text": prompt}, {"file_data": fileData}], config);
 
-	const requestBody = {
-            input: {
-		text: textToSynthesize
-            },
-            voice: {
-		languageCode: 'sl-SI',
-		name: 'sl-SI-Chirp3-HD-Callirrhoe'
-            },
-            audioConfig: {
-		audioEncoding: 'MP3',
-		speakingRate: 0.8
-            }
-	};
-
-	try {
-            const response = await fetch(apiUrl, {
-		method: 'POST',
-		headers: {
-                    'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(requestBody)
-            });
-
-            if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error.message}`);
-            }
-
-            const data = await response.json();
-
-            if (data && data.audioContent) {
-		return data.audioContent; // This is the base64-encoded audio string
-            } else {
-		throw new Error('No audio content received in the response.');
-            }
-
-	} catch (error) {
-            console.error('Error synthesizing speech:', error);
-            throw error; // Re-throw the error for the caller to handle
-	}
-    }	
+    return response.body
+	.pipeThrough(new TextDecoderStream())
+	.pipeThrough(jsonListTransformer());
 }
 
-class ChatConnection {
-    constructor() {
-	this.model = "gemini-2.0-flash";
-    }
-
-    async simpleRequest(prompt) {
-	const response = await genericGoogleRequest(this.model, "generateContent", [{"text": prompt}], {});
-	const response_data = await response.json();
-	return response_data.candidates[0].content.parts[0].text;
-    }
-
-    async streamRequest(prompt) {
-	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}], {});
-
-	return response.body
-	  .pipeThrough(new TextDecoderStream())
-	  .pipeThrough(jsonListTransformer());
-    }
-
-    async uploadData(data, filename, mimeType) {
-	const response = await fetch(`https://generativelanguage.googleapis.com/upload/v1beta/files?key=${googleApiKey}`, {
-	    method: "POST",
-	    headers: {
-		"X-Goog-Upload-Protocol": "resumable",
-		"X-Goog-Upload-Command": "start",
-		"X-Goog-Upload-Header-Content-Length": data.size,
-		"X-Goog-Upload.Header-Content-Type": mimeType,
-		"Content-Type": "application/json"
-	    },
-	    body: JSON.stringify({
-		"file": {
-		    "display_name": filename
-		}
-	    })
-	});
-	if (! response.ok) {
-	    alert(`Upload request failed: ${response.statusText}`);
-	    return null;
-	}
-
-	const uploadUrl = response.headers.get("X-Goog-Upload-Url");
-
-	const response2 = await fetch(uploadUrl, {
-	    method: "POST",
-	    headers: {
-		"Content-Length": data.size,
-		"X-Goog-Upload-Offset": 0,
-		"X-Goog-Upload-Command": "upload, finalize"
-	    },
-	    body: data
-	});
-
-	const responseData = await response2.json();
-	return {
-	    "file_uri": responseData.file.uri,
-	    "mime_type": responseData.file.mimeType
-	};
-    }
-
-    async audioStreamRequest(prompt, audioData, mimeType) {
-	const fileData = await this.uploadData(audioData, "audio", mimeType);
-	const response = await genericGoogleRequest(this.model, "streamGenerateContent", [{"text": prompt}, {"file_data": fileData}], {});
-
-	return response.body
-	  .pipeThrough(new TextDecoderStream())
-	  .pipeThrough(jsonListTransformer());
-    }
+function languageData() {
+    return supportedLanguages[language];
 }
