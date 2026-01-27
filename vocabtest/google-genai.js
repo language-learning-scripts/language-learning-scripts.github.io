@@ -30,7 +30,11 @@ function dictIsEmpty(dict) {
 
 class GoogleRequestError extends Error {
     constructor(body) {
-	super(`Google request failed: ${body.error.message}`);
+	if (! body) {
+	    super("Google request failed. No error available.")
+	} else {
+	    super(`Google request failed: ${body.error.message}`);
+	}
     }
 }
 

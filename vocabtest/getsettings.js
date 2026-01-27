@@ -1,6 +1,6 @@
 var googleApiKey = "";
 var genModel = "gemini-2.5-flash-lite";
-var assessModel = "gemini-2.5-flash";
+var assessModel = "gemini-3-flash-preview";
 var language = "slovene";
 var vocab = []
 
@@ -49,14 +49,10 @@ const supportedLanguages = {
 function activateSettingsModal() {
     keyEntry = document.getElementById("apiKeyEntry");
     keyEntry.value = googleApiKey;
-    document.getElementById("genModelEntry").value = genModel;
-    document.getElementById("assessModelEntry").value = assessModel;
     document.getElementById("settingsOverlay").style.display = "block";
 }
 
 function loadSettings() {
-    genModel = localStorage.getItem("genModel");
-    assessModel = localStorage.getItem("assessModel");
     googleApiKey = localStorage.getItem("googleApiKey");
     
     language = localStorage.getItem("cacophonyLanguage");
@@ -67,16 +63,12 @@ function loadSettings() {
 
 function collectSettings() {
     googleApiKey = document.getElementById("apiKeyEntry").value;
-    genModel = document.getElementById("genModelEntry").value;
-    assessModel = document.getElementById("assessModelEntry").value;
     newLanguage = document.getElementById("language").value;
     if (newLanguage != language) {
 	vocab = [];
     }
     language = newLanguage;
     localStorage.setItem("googleApiKey", googleApiKey);
-    localStorage.setItem("genModel", genModel);
-    localStorage.setItem("assessModel", assessModel);
     localStorage.setItem("cacophonyLanguage", language);
     document.getElementById("settingsOverlay").style.display = "none";
 }

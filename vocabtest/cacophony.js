@@ -44,13 +44,15 @@ async function generateForeignSentence() {
     document.getElementById("answerInput").value = "";
     await ensureVocabLoaded();
     const entry = pick(vocab);
-    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the ${languageName()} sentence and no other text.`
+    const gender = pick(["male", "female"]);
+    const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to listen to and translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). The speaker of the sentence is ${gender}. Respond with the ${languageName()} sentence and no other text.`
 
     status.pinStatus("Generating sentence...");
     const testSentence = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 2.0});
 
+    const voice = gender === "male" ? pick(supportedLanguages[language].male_voices) : pick(supportedLanguages[language].female_voices);
     status.pinStatus("Converting sentence to audio...");
-    mp3Data = await generateAudio(testSentence, pick(languageData().male_voices.concat(languageData().female_voices)));
+    mp3Data = await generateAudio(testSentence, voice);
     status.updateStatus("Playing sentence...");
 
     playMP3Base64(mp3Data);
@@ -101,17 +103,22 @@ function disableSpeakButtons() {
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
     const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do?`;
-    const assessStream = await streamRequest(prompt, assessModel);
-    await streamToElement(assessStream, document.getElementById("listenAssess"));
+    const assessElt = document.getElementById("listenAssess");
+    assessElt.innerHTML = "Thinking...";
+    const assessStream = await streamRequest(prompt, assessModel, config = {"thinkingConfig": {"thinkingLevel": "low"}});
+    await streamToElement(assessStream, assessElt);
     document.getElementById("generateForeignSentence").disabled = false;
 }
 
 async function listenShowAnswer(testSentence) {
     disableListenButtons();
+    const assessElt = document.getElementById("listenAssess");
+    assessElt.innerHTML = "Thinking...";
+
     const answerStream = await streamRequest(
 	`I'm having trouble translating the ${languageName()} sentence "${testSentence}" into English. Please explain how to translate it.`, assessModel
     );
-    await streamToElement(answerStream, document.getElementById("listenAssess"));
+    await streamToElement(answerStream, assessElt, config = {"thinkingConfig": {"thinkingLevel": "low"}});
     document.getElementById("generateForeignSentence").disabled = false;
 }
 
@@ -160,24 +167,29 @@ async function recordAnswer(testPhrase) {
 
 async function speakAssess(testPhrase, wavData) {
     disableSpeakButtons();
+    const assessElt = document.getElementById("speakAssess");
+    assessElt.innerHTML = "Thinking...";
     const assessmentStream = await audioStreamRequest(
 	`I'm learning ${languageName()}. This is my attempt to say '${testPhrase}' in ${languageName()}. How did I do? Say what you understood of my answer and point out any mistakes you noticed.`,
 	wavData,
 	"audio/wav",
-	assessModel
+	assessModel,
+	config = {"thinkingConfig": {"thinkingLevel": "low"}}
     );
 
-    await streamToElement(assessmentStream, document.getElementById("speakAssess"));
+    await streamToElement(assessmentStream, assessElt);
     document.getElementById("generateEnglishSentence").disabled = false;
 }
 
 async function speakShowAnswer(questionPhrase) {
     disableSpeakButtons();
+    const assessElt = document.getElementById("speakAssess");
+    assessElt.innerHTML = "Thinking...";
     const answerStream = await streamRequest(
-	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it.`, assessModel
+	`I'm having trouble translating the sentence ${questionPhrase} into ${languageName()}. Please explain how to translate it.`, assessModel, config = {"thinkingConfig": {"thinkingLevel": "low"}}
     );
 
-    await streamToElement(answerStream, document.getElementById("speakAssess"));
+    await streamToElement(answerStream, assessElt);
     document.getElementById("generateEnglishSentence").disabled = false;
 }
 
