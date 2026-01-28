@@ -64,8 +64,10 @@ async function generateForeignSentence() {
     repeatButton.disabled = false;
 
     const tryAnswerButton = document.getElementById("tryAnswer");
+    const answerInput = document.getElementById("answerInput");
+    answerInput.focus();
     tryAnswerButton.onclick = (e) => {
-	listenAssess(testSentence, document.getElementById("answerInput").value);
+	listenAssess(testSentence, answerInput.value);
     };
     tryAnswerButton.disabled = false;
     document.getElementById("answerInputForm").onsubmit = (e) => {
@@ -102,6 +104,7 @@ function disableSpeakButtons() {
 
 async function listenAssess(testSentence, userAnswer) {
     disableListenButtons();
+    document.getElementById("answerInput").blur();
     const prompt = `I'm learning ${languageName()}. I listened to the phrase "${testSentence}" and my attempt to translate it was "${userAnswer}". How did I do?`;
     const assessElt = document.getElementById("listenAssess");
     assessElt.innerHTML = "Thinking...";
