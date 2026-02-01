@@ -1,5 +1,5 @@
 var googleApiKey = "";
-var genModel = "gemini-2.5-flash";
+var genModel = "gemini-3-flash-preview";
 var assessModel = "gemini-3-flash-preview";
 var language = "slovene";
 var vocab = []

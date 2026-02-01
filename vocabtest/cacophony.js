@@ -48,7 +48,7 @@ async function generateForeignSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in ${languageName()} for them to listen to and translate. The sentence should contain the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). The speaker of the sentence is ${gender}. Respond with the ${languageName()} sentence and no other text.`
 
     status.pinStatus("Generating sentence...");
-    const testSentence = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 1.5});
+    const testSentence = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 1.5, "thinkingConfig": {"thinkingLevel": "minimal"}});
 
     const voice = gender === "male" ? pick(supportedLanguages[language].male_voices) : pick(supportedLanguages[language].female_voices);
     status.pinStatus("Converting sentence to audio...");
@@ -132,7 +132,7 @@ async function generateEnglishSentence() {
     const testPhrasePrompt = `You are helping someone learn ${languageName()} by generating a simple sentence in English for them to translate into ${languageName()}. The sentence should test their knowledge of the following word or phrase from their vocabulary list: "${entry["foreign"]}" ("${entry["english"]}"). Respond with the English sentence and no other text.`
 
     status.updateStatus("Requesting sentence...")
-    const testPhrase = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 1.5});
+    const testPhrase = await simpleGenRequest(testPhrasePrompt, genModel, config = {"temperature": 1.5, "thinkingConfig": {"thinkingLevel": "minimal"}});
     document.getElementById("question").innerHTML = testPhrase;
     const toggleRecordButton = document.getElementById("toggleRecording");
     toggleRecordButton.innerHTML = "Ready to speak";
